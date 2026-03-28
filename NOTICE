@@ -1,0 +1,22 @@
+mod_doscontrol
+Copyright (c) 2026 Kamil BuriXon Burek
+
+This project is based on and inspired by mod_evasive,
+originally created by Jonathan Zdziarski.
+
+mod_evasive
+Copyright (c) 2005 Jonathan A. Zdziarski
+
+This software includes concepts, structural elements, and portions
+of code derived from mod_evasive, which is licensed under the GNU
+General Public License version 2 (GPLv2) "or later".
+
+mod_doscontrol is a reworked and refactored implementation built
+on top of those foundations, extending functionality and adapting
+the module for modern Apache 2.4 environments.
+
+This project is distributed under the terms of the GNU General Public
+License version 3 (GPLv3), with permission to upgrade from the
+original GPLv2 "or later" license of mod_evasive.
+
+See the LICENSE file for full details.
