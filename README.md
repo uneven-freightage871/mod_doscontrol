@@ -179,7 +179,7 @@ After installation, the module should be loaded from Apache configuration, eithe
 
 Example:
 
-```apache
+```apacheconf
 LoadModule doscontrol_module modules/mod_doscontrol.so
 ```
 
@@ -201,7 +201,7 @@ The module watches client IP, request URI, and User-Agent. It first applies whit
 
 ### Basic example
 
-```apache
+```apacheconf
 LoadModule doscontrol_module modules/mod_doscontrol.so
 
 DOSHashTableSize 4097
@@ -226,7 +226,7 @@ Sets the internal hash table size used for tracking request activity.
 
 Default: `3097`
 
-```apache
+```apacheconf
 DOSHashTableSize 4097
 ```
 
@@ -244,7 +244,7 @@ Controls how many requests to the same URI are allowed inside the per-page time 
 
 Default: `10`
 
-```apache
+```apacheconf
 DOSPageCount 12
 ```
 
@@ -262,7 +262,7 @@ Controls how many requests across the whole site are allowed inside the site-wid
 
 Default: `50`
 
-```apache
+```apacheconf
 DOSSiteCount 60
 ```
 
@@ -280,7 +280,7 @@ Sets the per-page counting window in seconds.
 
 Default: `1`
 
-```apache
+```apacheconf
 DOSPageInterval 1
 ```
 
@@ -298,7 +298,7 @@ Sets the site-wide counting window in seconds.
 
 Default: `1`
 
-```apache
+```apacheconf
 DOSSiteInterval 1
 ```
 
@@ -316,7 +316,7 @@ Sets how long, in seconds, a client remains blocked after a detection event.
 
 Default: `30`
 
-```apache
+```apacheconf
 DOSBlockingPeriod 30
 ```
 
@@ -334,7 +334,7 @@ Selects the HTTP response code sent to a detected client.
 
 Default: `403`
 
-```apache
+```apacheconf
 DOSResponseCode 429
 ```
 
@@ -352,7 +352,7 @@ Adds an artificial delay before sending the blocked response.
 
 Default: `0`
 
-```apache
+```apacheconf
 DOSBlockDelay 250
 ```
 
@@ -371,7 +371,7 @@ Sets the path of the main module log file.
 
 Default: `/var/log/apache2/mod_doscontrol.log`
 
-```apache
+```apacheconf
 DOSMainLog /var/log/apache2/mod_doscontrol.log
 ```
 
@@ -389,7 +389,7 @@ Sets the directory used for incident cache files.
 
 Default: `/tmp/mod_doscontrol`
 
-```apache
+```apacheconf
 DOSCacheDir /tmp/mod_doscontrol
 ```
 
@@ -407,7 +407,7 @@ Sets the email address that receives notification messages when a client is bloc
 
 Default: not set
 
-```apache
+```apacheconf
 DOSEmailNotify admin@example.com
 ```
 
@@ -425,7 +425,7 @@ Runs an external command when a client is blocked.
 
 Default: not set
 
-```apache
+```apacheconf
 DOSSystemCommand /usr/local/bin/notify-block.sh %s
 ```
 
@@ -445,7 +445,7 @@ Adds a whitelisted IP rule.
 
 Default: none
 
-```apache
+```apacheconf
 DOSWhitelistIP 127.0.0.1
 DOSWhitelistIP 192.168.1.*
 DOSWhitelistIP 10.0.0.0/8
@@ -467,7 +467,7 @@ Adds a whitelisted User-Agent rule.
 
 Default: none
 
-```apache
+```apacheconf
 DOSWhitelistUA curl*
 DOSWhitelistUA *HealthChecker*
 DOSWhitelistUA Mozilla/5.?
@@ -501,7 +501,7 @@ This module exposes 10 levels:
 - `DOSCustomLevelCount9` / `DOSCustomLevelAdd9`
 - `DOSCustomLevelCount10` / `DOSCustomLevelAdd10`
 
-```apache
+```apacheconf
 DOSCustomLevelCount1 3
 DOSCustomLevelAdd1 /login
 DOSCustomLevelAdd1 /admin/*
@@ -560,7 +560,7 @@ Suggested level ideas:
 
 ### Server-wide configuration
 
-```apache
+```apacheconf
 LoadModule doscontrol_module modules/mod_doscontrol.so
 
 DOSHashTableSize 4097
@@ -577,7 +577,7 @@ DOSCacheDir /tmp/mod_doscontrol
 
 ### VirtualHost example
 
-```apache
+```apacheconf
 <VirtualHost *:80>
 	ServerName example.com
 	DocumentRoot /var/www/example.com/public_html
@@ -616,7 +616,7 @@ This is the recommended way if you want different detection sensitivity per site
 
 Set the following directives **globally** (in main server config):
 
-```apache
+```apacheconf
 DOSHashTableSize 3097
 DOSPageCount 10
 DOSSiteCount 50
@@ -636,7 +636,7 @@ DOSSystemCommand "/usr/local/bin/firewall-block %s"
 
 Then use `VirtualHost` blocks for **customization and exceptions**:
 
-```apache
+```apacheconf
 <VirtualHost *:80>
 	ServerName example.com
 
@@ -682,7 +682,7 @@ Keeping the **core global** and **logic local** gives you:
 
 ### High-sensitivity login protection
 
-```apache
+```apacheconf
 DOSPageCount 3
 DOSSiteCount 20
 DOSPageInterval 1
@@ -698,7 +698,7 @@ DOSCustomLevelAdd1 /api/login
 
 ### General public site protection
 
-```apache
+```apacheconf
 DOSPageCount 12
 DOSSiteCount 60
 DOSPageInterval 1
@@ -714,7 +714,7 @@ DOSCustomLevelAdd2 /checkout
 
 ### Quiet logging mode with detection only
 
-```apache
+```apacheconf
 DOSPageCount 15
 DOSSiteCount 80
 DOSBlockingPeriod 10
