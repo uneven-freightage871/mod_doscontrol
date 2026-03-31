@@ -122,7 +122,7 @@ If you prefer to separate build and install steps, you can also run:
 
 ```sh
 apxs -c mod_doscontrol.c
-sudo apxs -i -a -n dosdetect mod_doscontrol.la
+sudo apxs -i -a -n doscontrol mod_doscontrol.la
 ```
 
 The package `apache2-dev` provides the Apache development files and `apxs` on Debian-based systems.
@@ -202,7 +202,7 @@ The module watches client IP, request URI, and User-Agent. It first applies whit
 ### Basic example
 
 ```apache
-LoadModule dosdetect_module modules/mod_doscontrol.so
+LoadModule doscontrol_module modules/mod_doscontrol.so
 
 DOSHashTableSize 4097
 DOSPageCount 12
@@ -561,7 +561,7 @@ Suggested level ideas:
 ### Server-wide configuration
 
 ```apache
-LoadModule dosdetect_module modules/mod_doscontrol.so
+LoadModule doscontrol_module modules/mod_doscontrol.so
 
 DOSHashTableSize 4097
 DOSPageCount 12
